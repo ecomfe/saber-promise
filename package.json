@@ -1,0 +1,11 @@
+{
+  "name": "saber-promise",
+  "version": "0.1.0",
+  "description": "适用于移动端的Promise/A+实现",
+  "main": "promise",
+  "contributors": [
+    { "name": "treelite", "email": "c.xinle@gmail.com" }
+  ],
+  "repository": "git://github.com/ecomfe/saber-promise.git",
+  "license": "BSD"
+}
