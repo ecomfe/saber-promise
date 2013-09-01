@@ -1,6 +1,6 @@
 # saber-promise
 
-<del>吾王的</del>移动端的[Promise/A+](http://promises-aplus.github.io/promises-spec/)实现
+<del><a href="http://baike.baidu.com/view/8420590.htm" target="_blank">吾王</a>的</del>移动端的[Promise/A+](http://promises-aplus.github.io/promises-spec/)实现
 
 ## Usage
 
