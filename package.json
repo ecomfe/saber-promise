@@ -4,8 +4,17 @@
   "description": "适用于移动端的Promise/A+实现",
   "main": "promise",
   "contributors": [
-    { "name": "treelite", "email": "c.xinle@gmail.com" }
+    {
+      "name": "treelite",
+      "email": "c.xinle@gmail.com"
+    }
   ],
+  "scripts": {
+    "test": "promises-aplus-tests test/adapter"
+  },
   "repository": "git://github.com/ecomfe/saber-promise.git",
-  "license": "BSD"
+  "license": "BSD",
+  "devDependencies": {
+    "promises-aplus-tests": "~1.3.2"
+  }
 }

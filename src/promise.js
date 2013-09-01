@@ -103,7 +103,7 @@ define(function () {
      * @param {Object} resolver
      */
     function resolve(resolver) {
-        var items = status == STATUS.FULFILLED
+        var items = resolver.status == STATUS.FULFILLED
             ? resolver.fulfillList
             : resolver.rejectList;
 
