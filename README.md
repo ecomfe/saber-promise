@@ -8,15 +8,25 @@
     
     function doSomeThing() {
         var resolver = new Resolver();
-        doSync(function (result) {
-            resolver.fulfill(result);
-        });
+        doSync(
+            function (result) {
+                resolver.fulfill(result);
+            },
+            function () {
+                resolver.reject('connect error');
+            }
+        );
         return resolver.promise();
     }
 
-    doSomeThing().then(function () {
-        alert(result);
-    });
+    doSomeThing().then(
+        function (result) {
+            alert(result);
+        },
+        function (reason) {
+            alert(reason);
+        }
+    );
 
 ## API
 
