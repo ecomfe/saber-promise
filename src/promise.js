@@ -32,7 +32,8 @@ define(function () {
      * @return {boolean}
      */
     function isPromise(value) {
-        return value instanceof Promise;
+        return value instanceof Promise
+            || (value && value.then && isFunction(value.then));
     }
 
     /**
