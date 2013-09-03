@@ -161,9 +161,24 @@ define(function () {
      * 生成Promise
      *
      * @public
+     * @param {Object} wrapper 包装对象
+     * @return {Object}
      */
-    Resolver.prototype.promise = function () {
-        return new Promise(this);
+    Resolver.prototype.promise = function (wrapper) {
+        var res = new Promise(this);
+
+        if (wrapper) {
+            for (var key in wrapper) {
+                if (wrapper.hasOwnProperty(key) 
+                    && key != 'then'
+                    && key != 'resolver'
+                ) {
+                    res[key] = wrapper[key];
+                }
+            }
+        }
+
+        return res;
     };
 
     /**
