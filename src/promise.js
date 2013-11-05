@@ -24,44 +24,85 @@ define(function () {
             == Object.prototype.toString.call(value);
     }
 
-    /**
-     * Promise对象判断
-     *
-     * @inner
-     * @param {Object} value
-     * @return {boolean}
-     */
-    function isPromise(value) {
-        return value instanceof Promise
-            || (value && value.then && isFunction(value.then));
+    function isObject(value) {
+        return '[object Object]' 
+            == Object.prototype.toString.call(value);
     }
 
     /**
-     * 包装then参数中的回调函数
+     * 使用value确定resolver的状态
      *
-     * @inner
-     * @param {Object} resolver then函数返回的值对应的Resolver
-     * @param {Function} callback then参数中的回调函数
-     * @return {Function}
+     * @param {Resolver}
+     * @param {Object} value
      */
-    function wrapCallback(resolver, callback) {
-        return function (data) {
-            var res;
+    function resolve(resolver, value) {
+        if (value instanceof Promise) {
+            value.then(
+                function (data) {
+                    resolve(resolver, data);
+                },
+                function (reason) {
+                    resolver.reject(reason);
+                }
+            );
+        }
+        else if (isObject(value) || isFunction(value)) {
             try {
-                res = callback(data);
-                if (!isPromise(res)) {
-                    resolver.fulfill(res);
+                var then = value.then;
+                if (isFunction(then)) {
+                    // 保证resolvePromise与rejectPromise
+                    // 只能被调用一次
+                    // see #2.3.3.3.3
+                    var called;
+                    try {
+                        then.call(
+                            value, 
+                            function (data) {
+                                if (!called) {
+                                    resolve(resolver, data);
+                                    called = true;
+                                }
+                            },
+                            function (reason) {
+                                if (!called) {
+                                    resolver.reject(reason);
+                                    called = true;
+                                }
+                            }
+                        );
+                    }
+                    catch (e) {
+                        if (!called) {
+                            resolver.reject(e);
+                        }
+                    }
                 }
                 else {
-                    res.then(
-                        function (data) {
-                            resolver.fulfill(data);
-                        },
-                        function (reason) {
-                            resolver.reject(reason);
-                        }
-                    );
+                    resolver.fulfill(value);
                 }
+            }
+            catch (e) {
+                resolver.reject(e);
+            }
+        }
+        else {
+            resolver.fulfill(value);
+        }
+    }
+
+    /**
+     * 包装then回调函数
+     * 试其能根据回调的返回结果设置then返回的Resolver对象状态
+     */
+    function wrapCallback(resolver, promise, callback) {
+        return function (data) {
+            try {
+                var res = callback(data);
+                if (res === promise) {
+                    throw new TypeError();
+                }
+
+                resolve(resolver, res);
             }
             catch (e) {
                 resolver.reject(e);
@@ -83,11 +124,13 @@ define(function () {
         if (resolver.status == status) {
             // 设置延迟
             // 为了让then函数先返回再执行回调
-            // see Promises/A+ 3.2.4
-            // http://promises-aplus.github.io/promises-spec/ 
-            setTimeout(function () {
-                callback(resolver.data);
-            }, 0);
+            // see #2.2.4
+            setTimeout(
+                function () {
+                    callback(resolver.data);
+                }, 
+                0
+            );
         }
         else if (status == STATUS.FULFILLED) {
             resolver.fulfillList.push(callback);
@@ -103,15 +146,28 @@ define(function () {
      *
      * @param {Object} resolver
      */
-    function resolve(resolver) {
+    function emit(resolver) {
         var items = resolver.status == STATUS.FULFILLED
             ? resolver.fulfillList
             : resolver.rejectList;
 
-        var item;
-        while (item = items.shift()) {
-            item(resolver.data);
+        if (items.length <= 0 ) {
+            return;
         }
+
+        var item;
+        // 触发注册的回调函数必须
+        // 在状态改变完成后
+        // see #2.2.2 #2.2.3 #2.2.4
+        setTimeout(
+            function () {
+                var item;
+                while (item = items.shift()) {
+                    item(resolver.data);
+                }
+            },
+            0
+        );
     }
 
     /**
@@ -138,7 +194,8 @@ define(function () {
 
         this.data = data;
         this.status = STATUS.FULFILLED;
-        resolve(this);
+        emit(this);
+
     };
 
     /**
@@ -154,7 +211,7 @@ define(function () {
         
         this.data = reason;
         this.status = STATUS.REJECTED;
-        resolve(this);
+        emit(this);
     };
 
     /**
@@ -202,11 +259,16 @@ define(function () {
      */
     Promise.prototype.then = function (onFulfilled, onRejected) {
         var res = new Resolver();
+        var promise = res.promise();
 
         if (isFunction(onFulfilled)) {
-            onFulfilled = wrapCallback(res, onFulfilled);
+            onFulfilled = wrapCallback(res, promise, onFulfilled);
         }
         else {
+            // not function
+            // 'return promise' must fulfill with the same value 
+            // when 'main promise' is resolved
+            // see #2.2.7.3
             onFulfilled = function (data) {
                 res.fulfill(data);
             };
@@ -214,16 +276,20 @@ define(function () {
         addListener(this.resolver, STATUS.FULFILLED, onFulfilled);
 
         if (isFunction(onRejected)) {
-            onRejected = wrapCallback(res, onRejected);
+            onRejected = wrapCallback(res, promise, onRejected);
         }
         else {
+            // not function
+            // 'return promise' must reject with the same reason 
+            // when 'main promise' is rejected
+            // see #2.2.7.4
             onRejected = function (reason) {
                 res.reject(reason);
             };
         }
         addListener(this.resolver, STATUS.REJECTED, onRejected);
 
-        return res.promise();
+        return promise;
     };
 
     return Resolver;

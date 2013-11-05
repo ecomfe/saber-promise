@@ -5,26 +5,36 @@
 
 var Resolver;
 
-function define(def) {
+// eval的方法不能断点调试
+// 改用require + global函数注册的方式
+
+global.define = function (def) {
      Resolver = def();
-}
+};
 
-var code = require('fs').readFileSync(
-    require('path').resolve(__dirname, '../src/promise.js'),
-    'utf-8'
-);
+require('../src/promise');
 
-eval(code);
+exports.resloved = function (value) {
+    var resolver = new Resolver();
 
- // 适配pending
- // 导出供Test Suite使用
-exports.pending = function () {
+    resolver.fulfill(value);
+    return resolver.promise();
+};
+
+exports.rejected = function (reason) {
+    var resolver = new Resolver();
+
+    resolver.reject(reason);
+    return resolver.promise();
+};
+
+exports.deferred = function () {
     var resolver = new Resolver();
 
     return {
         promise: resolver.promise(),
 
-        fulfill: function (value) {
+        resolve: function (value) {
             resolver.fulfill(value);
         },
 
