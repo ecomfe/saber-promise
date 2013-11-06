@@ -1,6 +1,6 @@
 # saber-promise
 
-<del><a href="http://baike.baidu.com/view/8420590.htm" target="_blank">吾王</a>的</del>移动端的[Promise/A+](http://promises-aplus.github.io/promises-spec/)实现
+<del><a href="http://baike.baidu.com/view/8420590.htm" target="_blank">吾王</a>的</del>移动端的[Promise/A+](http://promises-aplus.github.io/promises-spec/)实现，遵循**1.1**规范
 
 ## Usage
 
@@ -38,16 +38,21 @@
 
     var resolver = new Resolver();
 
-### Resolver.fulfill(data)
+### Resolver.fulfill( data )
 
 将状态由`等待`变更为`已完成`，并将`data`作为第一个参数触发所有已注册的`onFulfilled`回调函数
 
     var resolver = new Resolver();
     resolver.fulfill(100);
 
+
 多次调用处于非`等待`状态的`Resolver`实例的`fulfill`方法是无效的
 
-### Resolver.reject(reason)
+### Resolver.reslove( data )
+
+完全等同于 `Resolver.fulfill`，改个比较通用的名字...(&gt;_&lt;)...
+
+### Resolver.reject( reason )
 
 将状态由`等待`变更为`已拒绝`，并将`reason`作为第一个参数触发所有已注册的`onRejected`回调函数
 
@@ -64,7 +69,7 @@
 
 只能通过`Resolver.promise()`创建
 
-### Promise.then(onFulfilled, onRejected)
+### Promise.then( onFulfilled, onRejected )
 
 注册`已完成`和`已拒绝`状态的回调
 

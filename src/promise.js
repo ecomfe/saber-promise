@@ -250,7 +250,7 @@ define(function () {
      * fulfill
      *
      * @public
-     * @param {Object} data
+     * @param {*} data
      */
     Resolver.prototype.fulfill = function (data) {
         if (this.status != STATUS.PENDING) {
@@ -264,10 +264,18 @@ define(function () {
     };
 
     /**
+     * resolve
+     *
+     * @public
+     * @param {*} data
+     */
+    Resolver.prototype.reslove = Resolver.prototype.fulfill;
+
+    /**
      * reject
      *
      * @public
-     * @param {Object} reason
+     * @param {*} reason
      */
     Resolver.prototype.reject = function (reason) {
         if (this.status != STATUS.PENDING) {
