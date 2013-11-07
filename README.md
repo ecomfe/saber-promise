@@ -4,29 +4,35 @@
 
 ## Usage
 
-    var Resolver = require('saber-promise');
-    
-    function doSomeThing() {
-        var resolver = new Resolver();
-        doSync(
-            function (result) {
-                resolver.fulfill(result);
-            },
-            function () {
-                resolver.reject('connect error');
-            }
-        );
-        return resolver.promise();
-    }
+通过`edp`引入模块
 
-    doSomeThing().then(
+    $ edp import saber-promise
+
+```javascript
+var Resolver = require('saber-promise');
+
+function doSomeThing() {
+    var resolver = new Resolver();
+    doSync(
         function (result) {
-            alert(result);
+            resolver.fulfill(result);
         },
-        function (reason) {
-            alert(reason);
+        function () {
+            resolver.reject('connect error');
         }
     );
+    return resolver.promise();
+}
+
+doSomeThing().then(
+    function (result) {
+        alert(result);
+    },
+    function (reason) {
+        alert(reason);
+    }
+);
+```
 
 ## API
 
@@ -36,14 +42,18 @@
 
 创建`Resolver`实例
 
-    var resolver = new Resolver();
+```javascript
+var resolver = new Resolver();
+```
 
 ### Resolver.fulfill( data )
 
 将状态由`等待`变更为`已完成`，并将`data`作为第一个参数触发所有已注册的`onFulfilled`回调函数
 
-    var resolver = new Resolver();
-    resolver.fulfill(100);
+```javascript
+var resolver = new Resolver();
+resolver.fulfill(100);
+```
 
 
 多次调用处于非`等待`状态的`Resolver`实例的`fulfill`方法是无效的
@@ -56,8 +66,10 @@
 
 将状态由`等待`变更为`已拒绝`，并将`reason`作为第一个参数触发所有已注册的`onRejected`回调函数
 
-    var resolver = new Resolver();
-    resolver.reject('找不到对象');
+```javascript
+var resolver = new Resolver();
+resolver.reject('找不到对象');
+```
 
 多次调用处于非`等待`状态的`Resolver`实例的`reject`方法是无效的
 
@@ -82,7 +94,7 @@
 
 使用Promises/A+规范的[Test Suite](https://github.com/promises-aplus/promises-tests)
 
-    npm test
+    $ npm test
 
 ===
 
