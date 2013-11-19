@@ -341,7 +341,7 @@ define(function () {
      * @public
      * @param {*} data
      */
-    Resolver.prototype.reslove = Resolver.prototype.fulfill;
+    Resolver.prototype.resolve = Resolver.prototype.fulfill;
 
     /**
      * reject

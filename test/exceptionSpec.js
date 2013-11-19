@@ -64,7 +64,7 @@ describe('global event', function () {
         Resolver.on('resolve', handler);
 
         var resolver = new Resolver();
-        resolver.reslove(123);
+        resolver.resolve(123);
 
         setTimeout(function () {
             expect(handler).toHaveBeenCalled();
@@ -73,7 +73,7 @@ describe('global event', function () {
 
         Resolver.un('resolve', handler);
         resolver = new Resolver();
-        resolver.reslove(123);
+        resolver.resolve(123);
 
         setTimeout(function () {
             expect(handler.callCount).toBe(1);

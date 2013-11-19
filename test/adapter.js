@@ -17,7 +17,7 @@ require('../src/promise');
 exports.resolved = function (value) {
     var resolver = new Resolver();
 
-    resolver.reslove(value);
+    resolver.resolve(value);
     return resolver.promise();
 };
 
@@ -35,7 +35,7 @@ exports.deferred = function () {
         promise: resolver.promise(),
 
         resolve: function (value) {
-            resolver.reslove(value);
+            resolver.resolve(value);
         },
 
         reject: function (reason) {

@@ -62,7 +62,7 @@ resolver.fulfill(100);
 
 多次调用处于非`等待`状态的`Resolver`实例的`fulfill`方法是无效的
 
-### resolver.reslove( data )
+### resolver.resolve( data )
 
 完全等同于 `Resolver.fulfill`，改个比较通用的名字...(&gt;_&lt;)...
 
