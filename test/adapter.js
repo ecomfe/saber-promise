@@ -14,7 +14,7 @@ global.define = function (def) {
 
 require('../src/promise');
 
-exports.resloved = function (value) {
+exports.resolved = function (value) {
     var resolver = new Resolver();
 
     resolver.reslove(value);

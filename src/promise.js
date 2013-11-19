@@ -5,12 +5,40 @@
 
 define(function () {
 
-    // resolver的状态
+    /**
+     * resolver的状态
+     *
+     * @type {Object}
+     */
     var STATUS = {
         PENDING: 0,
         FULFILLED: 1,
         REJECTED: 2
     };
+
+    
+    /**
+     * 是否捕获异常
+     * 规范要求捕获所有异常 see #2.2.7.2
+     *
+     * but 捕获了所有异常 开发可能比较难找错误...
+     * 可以在debug下调用`Resolver.disableExceptionCapture()`
+     * 关闭异常捕获简单粗暴管事儿
+     *
+     * 更优雅点的方式是`Resolver.on('reject', fn)`注册全局事件来统一处理异常
+     * 
+     *
+     * @type {boolean}
+     */
+    var captureException = true;
+
+    /**
+     * 是否启用全局事件
+     * 默认不启用
+     *
+     * @type {boolean}
+     */
+    var globalEvent = false;
 
     /**
      * 函数判断
@@ -76,7 +104,10 @@ define(function () {
                 }
             }
             catch (e) {
-                if (!called) {
+                if (!captureException) {
+                    throw e;
+                }
+                else if (!called) {
                     resolver.reject(e);
                 }
             }
@@ -110,7 +141,12 @@ define(function () {
                 resolve(resolver, res);
             }
             catch (e) {
-                resolver.reject(e);
+                if (captureException) {
+                    resolver.reject(e);
+                }
+                else {
+                    throw e;
+                }
             }
         };
     }
@@ -156,6 +192,8 @@ define(function () {
         var items = resolver.status == STATUS.FULFILLED
             ? resolver.fulfillList
             : resolver.rejectList;
+
+        fireGlobalEvent(resolver);
 
         if (items.length <= 0 ) {
             return;
@@ -236,6 +274,25 @@ define(function () {
     }
 
     /**
+     * 触发全局事件
+     *
+     * @inner
+     * @param {Resolver} resolver
+     * @param {string} type 事件类型
+     */
+    function fireGlobalEvent(resolver) {
+        var type = resolver.status == STATUS.FULFILLED 
+                    ? 'resolve' 
+                    : 'reject';
+
+        if (globalEvent) {
+            Resolver.emit(type, {
+                data: resolver.data
+            });
+        }
+    }
+
+    /**
      * Resolver
      *
      * @constructor
@@ -245,6 +302,22 @@ define(function () {
         this.fulfillList = [];
         this.rejectList = [];
     }
+
+    /**
+     * 启动
+     */
+    Resolver.enableGlobalEvent = function (Emitter) {
+        Emitter.mixin(this);
+        globalEvent = true;
+    };
+
+    Resolver.disableExceptionCapture = function () {
+        captureException = false;
+    };
+
+    Resolver.enableExceptionCapture = function () {
+        captureException = true;
+    };
 
     /**
      * fulfill
@@ -260,7 +333,6 @@ define(function () {
         this.data = data;
         this.status = STATUS.FULFILLED;
         emit(this);
-
     };
 
     /**

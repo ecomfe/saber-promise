@@ -1,0 +1,108 @@
+/**
+ * @file 异常处理测试
+ * @author treelite(c.xinle@gmail.com)
+ */
+
+var Resolver;
+
+global.define = function (def) {
+     Resolver = def();
+};
+
+require('../src/promise');
+
+// mock Emitter
+var Emitter = {
+    handlers: {},
+    mixin: function (obj) {
+        var me = this;
+        obj.emit = function (type, e) {
+            var items = me.handlers[type] || [];
+
+            items.forEach(function (item) {
+                item.call(obj, e);
+            });
+        };
+
+        obj.on = function (type, fn) {
+            var items = me.handlers[type] || [];
+
+            items.push(fn);
+
+            me.handlers[type] = items;
+        };
+
+        obj.un = function (type, fn) {
+            var items = me.handlers[type] || [];
+
+            items.some(function (item, index) {
+                if (item == fn) {
+                    items.splice(index, 1);
+                    return true;
+                }
+            });
+        };
+    }
+};
+
+describe('global event', function () {
+
+    Resolver.enableGlobalEvent(Emitter);
+
+    it('enable', function () {
+        expect(typeof Resolver.emit).toBe('function');
+        expect(typeof Resolver.on).toBe('function');
+        expect(typeof Resolver.un).toBe('function');
+    });
+    
+    // **切记**
+    // 异步spec的异步断言部分如果本身抛异常了 jasmine-node无法正确捕获到
+    // 会终止运行 无任何输出
+    it('emit `resolve` when Resolver is resolved', function (done) {
+        var handler = jasmine.createSpy('handler');
+
+        Resolver.on('resolve', handler);
+
+        var resolver = new Resolver();
+        resolver.reslove(123);
+
+        setTimeout(function () {
+            expect(handler).toHaveBeenCalled();
+            expect(handler.mostRecentCall.args[0].data).toBe(123);
+        }, 0);
+
+        Resolver.un('resolve', handler);
+        resolver = new Resolver();
+        resolver.reslove(123);
+
+        setTimeout(function () {
+            expect(handler.callCount).toBe(1);
+            done();
+        }, 1);
+
+    });
+
+    it('emit `reject` when Resolver is rejected', function (done) {
+        var handler = jasmine.createSpy('handler');
+
+        Resolver.on('reject', handler);
+
+        var resolver = new Resolver();
+        resolver.reject(123);
+
+        setTimeout(function () {
+            expect(handler).toHaveBeenCalled();
+            expect(handler.mostRecentCall.args[0].data).toBe(123);
+        }, 0);
+
+        Resolver.un('reject', handler);
+        resolver = new Resolver();
+        resolver.reject(123);
+
+        setTimeout(function () { 
+            expect(handler.callCount).toBe(1);
+            done();
+        }, 0);
+    });
+
+});

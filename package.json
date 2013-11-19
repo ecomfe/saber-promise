@@ -10,11 +10,12 @@
     }
   ],
   "scripts": {
-    "test": "promises-aplus-tests test/adapter"
+    "test": "jasmine-node --verbose test && promises-aplus-tests test/adapter"
   },
   "repository": "git://github.com/ecomfe/saber-promise.git",
   "license": "BSD",
   "devDependencies": {
-    "promises-aplus-tests": "~2.0.1"
+    "promises-aplus-tests": "~2.0.1",
+    "jasmine-node": "~1.11.0"
   }
 }
