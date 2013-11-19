@@ -36,7 +36,9 @@ doSomeThing().then(
 
 ### About Exception
 
-规范要求捕获并处理所有的异常[#2.2.7.2](http://promisesaplus.com/#point-50)，在项目开发中可能会经常遇到非预期的异常被自动处理而导致无从跟踪，这些错误基本都是程序级别的错误而非可预期的业务逻辑错误，一般都不会有相应的`reject`处理。针对这种情况提供了全局事件：`reject`与`resolve`来监控处理（需要先调用`Resolver.enableGlobalEvent()`启用全局事件），更暴力一些还可以在**debug过程**中使用`Resolver.disableExceptionCapture()`来直接关闭异常处理，方便查找问题。（不建议生产环境中关闭异常处理）
+规范要求捕获并处理所有的异常[#2.2.7.2](http://promisesaplus.com/#point-50)，在项目开发中可能会经常遇到非预期的异常被自动处理而导致无从跟踪，这些错误基本都是程序级别的书写错误而非可预期的业务逻辑错误，一般都不会有相应的`reject`处理。针对这种情况提供了全局事件：`reject`与`resolve`来监控处理（需要先调用`Resolver.enableGlobalEvent()`启用全局事件），更暴力一些还可以在**debug过程**中使用`Resolver.disableExceptionCapture()`来直接关闭异常处理，方便查找问题。
+
+**警告** 异常相关的API都是**非标准的**，只建议在调试阶段使用，这些API在未来某版本中可能会被废除
 
 ## API
 
@@ -83,7 +85,7 @@ resolver.reject('找不到对象');
 
 ### Resolver.enableGlobalEvent( Emitter )
 
-启动全局事件
+**非标准API** 启动全局事件
 
 * `Emitter` `{Object}` 事件发射器
 
@@ -99,11 +101,11 @@ Resolver.on('resolve', function () {
 
 ### Resolver.disableExceptionCapture()
 
-禁用异常处理，默认时启动的。如果全局事件都不想监控了，用这个可以直接关闭异常处理，方便调试，简单粗暴～
+**非标准API** 禁用异常处理，默认时启动的。如果全局事件都不想监控了，用这个可以直接关闭异常处理，方便调试，简单粗暴～
 
 ### Resolver.enableExceptionCapture()
 
-启用异常处理
+**非标准API** 启用异常处理
 
 ### Promise
 
