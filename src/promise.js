@@ -363,21 +363,10 @@ define(function () {
      * 生成Promise
      *
      * @public
-     * @param {Object} wrapper 包装对象
-     * @return {Object}
+     * @return {Promise}
      */
-    Resolver.prototype.promise = function (wrapper) {
-        var res = createPromise(this);
-
-        if (wrapper) {
-            Object.keys(wrapper).forEach(function (key) {
-                if (key != 'then') {
-                    res[key] = wrapper[key];
-                }
-            });
-        }
-
-        return res;
+    Resolver.prototype.promise = function () {
+        return createPromise(this);
     };
 
     return Resolver;
