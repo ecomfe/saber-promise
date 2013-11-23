@@ -41,6 +41,59 @@ define(function () {
     var globalEvent = false;
 
     /**
+     * 延迟执行
+     * 
+     * @inner
+     */
+    var nextTick = (function () {
+        var res;
+
+        var Observer;
+        var callbacks = [];
+        var attributeName = 'promise';
+        function handler(mutations) {
+            var item = mutations[0];
+            if (item.attributeName == attributeName) {
+                var len = callbacks.length;
+                for (var i = 0; i < len; i++) {
+                    callbacks[i]();
+                }
+                callbacks.splice(0, i);
+            }
+        }
+
+        // only IE, currently
+        // https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/setImmediate/Overview.html#processingmodel
+        if (typeof setImmediate == 'function') {
+            res = setImmediate;
+        }
+        // for modern browser
+        else if (Observer = window.MutationObserver 
+            || window.webKitMutationObserver
+        ) {
+            var observer = new Observer(handler);
+            var ele = document.createElement('div');
+            observer.observe(ele, {attributes: true});
+
+            res = function (fn) {
+                callbacks.push(fn);
+                ele.setAttribute(
+                    attributeName, 
+                    Date.now ? Date.now() : (new Date()).getTime()
+                );
+            };
+        }
+        // for older browser
+        else {
+            res = function (fn) {
+                setTimeout(fn, 0);
+            };
+        }
+
+        return res;
+    })();
+
+    /**
      * 函数判断
      *
      * @inner
@@ -166,11 +219,10 @@ define(function () {
             // 设置延迟
             // 为了让then函数先返回再执行回调
             // see #2.2.4
-            setTimeout(
+            nextTick(
                 function () {
                     callback(resolver.data);
-                }, 
-                0
+                }
             );
         }
         else if (status == STATUS.FULFILLED) {
@@ -202,14 +254,13 @@ define(function () {
         // 触发注册的回调函数必须
         // 在状态改变完成后
         // see #2.2.2 #2.2.3 #2.2.4
-        setTimeout(
+        nextTick(
             function () {
                 var item;
                 while (item = items.shift()) {
                     item(resolver.data);
                 }
-            },
-            0
+            }
         );
     }
 
