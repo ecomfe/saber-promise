@@ -3,10 +3,8 @@
  * @author treelite(c.xinle@gmail.com)
  */
 
-var Resolver;
-
 global.define = function (def) {
-     Resolver = def();
+     global.Resolver = def();
 };
 
 require('../src/promise');
