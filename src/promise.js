@@ -355,19 +355,84 @@ define(function () {
     }
 
     /**
-     * 启动
+     * 启用全局事件
+     *
+     * @public
+     * @param {Emitter} Emitter
      */
     Resolver.enableGlobalEvent = function (Emitter) {
         Emitter.mixin(this);
         globalEvent = true;
     };
 
+    /**
+     * 禁用异常捕获
+     *
+     * @public
+     */
     Resolver.disableExceptionCapture = function () {
         captureException = false;
     };
 
+    /**
+     * 启用异常捕获
+     *
+     * @public
+     */
     Resolver.enableExceptionCapture = function () {
         captureException = true;
+    };
+
+    /**
+     * all
+     *
+     * @public
+     * @param {Array.<Promise>|...Promise} promises
+     * @return {Promise}
+     */
+    Resolver.all = function (promises) {
+
+        if (!Array.isArray(promises)) {
+            promises = Array.prototype.slice.call(arguments);
+        }
+
+        var resolve = new Resolver();
+        var resolvedCount = 0;
+        var res = [];
+
+        function createResolvedHandler(index) {
+            return function (data) {
+                res[index] = data;
+                resolvedCount++;
+                if (resolvedCount >= promises.length) {
+                    resolve.fulfill(res);
+                }
+            };
+        }
+
+        function rejectedHandler(reason) {
+            resolve.reject(reason);
+        }
+
+        promises.forEach(function (item, index) {
+            item.then(createResolvedHandler(index), rejectedHandler);
+        });
+
+        return resolve.promise();
+    };
+
+    /**
+     * 创建promise
+     *
+     * @public
+     * @param {function(Resolver)} fn
+     * @return {Promise}
+     */
+    Resolver.promise = function (fn) {
+        var resolver = new Resolver();
+
+        fn(resolver);
+        return resolver.promise();
     };
 
     /**
