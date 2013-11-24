@@ -42,9 +42,9 @@ doSomeThing().then(
 
 ## API
 
-### Resolver
+### Resolver 实例
 
-有三种状态：`等待`、`已完成`、`已拒绝`。只能从`等待`变为`已完成`或者从`等待`变为`已拒绝`，并且状态只能变更一次
+有三种状态：`pending`、`resolved`、`rejected`。只能从`pending`变为`resolved`或者从`pending`变为`rejected`，并且状态只能变更一次
 
 创建`Resolver`实例
 
@@ -52,9 +52,9 @@ doSomeThing().then(
 var resolver = new Resolver();
 ```
 
-### resolver.fulfill( data )
+#### resolver.fulfill( data )
 
-将状态由`等待`变更为`已完成`，并将`data`作为第一个参数触发所有已注册的`onFulfilled`回调函数
+将状态由`pending`变更为`resolved`，并将`data`作为第一个参数触发所有已注册的`onFulfilled`回调函数
 
 ```javascript
 var resolver = new Resolver();
@@ -62,28 +62,65 @@ resolver.fulfill(100);
 ```
 
 
-多次调用处于非`等待`状态的`Resolver`实例的`fulfill`方法是无效的
+多次调用处于非`pending`状态的`Resolver`实例的`fulfill`方法是无效的
 
-### resolver.resolve( data )
+#### resolver.resolve( data )
 
 完全等同于 `Resolver.fulfill`，改个比较通用的名字...(&gt;_&lt;)...
 
-### resolver.reject( reason )
+#### resolver.reject( reason )
 
-将状态由`等待`变更为`已拒绝`，并将`reason`作为第一个参数触发所有已注册的`onRejected`回调函数
+将状态由`pending`变更为`rejected`，并将`reason`作为第一个参数触发所有已注册的`onRejected`回调函数
 
 ```javascript
 var resolver = new Resolver();
 resolver.reject('找不到对象');
 ```
 
-多次调用处于非`等待`状态的`Resolver`实例的`reject`方法是无效的
+多次调用处于非`pending`状态的`Resolver`实例的`reject`方法是无效的
 
-### resolver.promise()
+#### resolver.promise()
 
 返回对应的Promise对象
 
-### Resolver.enableGlobalEvent( Emitter )
+### Promise 实例
+
+#### promise.then( onFulfilled, onRejected )
+
+注册`已完成`和`已拒绝`状态的回调
+
+* `onFulfilled` `已完成`状态回调
+* `onRejected` `已拒绝`状态回调
+
+返回`Promise`实例
+
+### Resolver
+
+#### Resolver.promise( fn )
+
+创建`Promise`对象的快捷方式
+
+* `fn` `function(resolver)` 处理函数
+
+```javascript
+var promise = Resolver.promise(function (resolver) {
+        setTimeout(function () {
+            resolver.resolve();
+        }, 0);
+    });
+
+promise.then(function () {
+    ...
+});
+```
+
+#### Resolver.all( promises )
+
+关联多个`promise`对象，返回的`promise`在所有参数都`resolved`时达到`resolved`状态，如果参数中的有任意`promise`对象`rejected`则立即达到`rejected`状态
+
+* `promises` `Array.<promise> | ...promise` 可以是数组参数或者多个`promise`对象
+
+#### Resolver.enableGlobalEvent( Emitter )
 
 **非标准API** 启动全局事件
 
@@ -99,26 +136,13 @@ Resolver.on('resolve', function () {
 });
 ```
 
-### Resolver.disableExceptionCapture()
+#### Resolver.disableExceptionCapture()
 
 **非标准API** 禁用异常处理，默认时启动的。如果全局事件都不想监控了，用这个可以直接关闭异常处理，方便调试，简单粗暴～
 
-### Resolver.enableExceptionCapture()
+#### Resolver.enableExceptionCapture()
 
 **非标准API** 启用异常处理
-
-### Promise
-
-只能通过`Resolver.promise()`创建
-
-### promise.then( onFulfilled, onRejected )
-
-注册`已完成`和`已拒绝`状态的回调
-
-* `onFulfilled` `已完成`状态回调
-* `onRejected` `已拒绝`状态回调
-
-返回`Promise`实例
 
 ## Test
 
