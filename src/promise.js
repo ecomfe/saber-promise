@@ -50,19 +50,18 @@ define(function () {
 
         var Observer;
         var callbacks = [];
-        var attributeName = 'promise';
-        function handler(mutations) {
-            var item = mutations[0];
-            if (item.attributeName == attributeName) {
-                var len = callbacks.length;
-                for (var i = 0; i < len; i++) {
-                    callbacks[i]();
-                }
-                callbacks.splice(0, i);
+        var NAME = 'promise';
+
+        function callback() {
+            var len = callbacks.length;
+            for (var i = 0; i < len; i++) {
+                callbacks[i]();
             }
+            callbacks.splice(0, i);
         }
 
-        // only IE, currently
+        // nodejs support this
+        // only IE on browser, currently
         // https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/setImmediate/Overview.html#processingmodel
         if (typeof setImmediate == 'function') {
             res = setImmediate;
@@ -71,16 +70,38 @@ define(function () {
         else if (Observer = window.MutationObserver 
             || window.webKitMutationObserver
         ) {
-            var observer = new Observer(handler);
+            var observer = new Observer(function (mutations) {
+                var item = mutations[0];
+                if (item.attributeName == NAME) {
+                    callback();
+                }
+            });
             var ele = document.createElement('div');
             observer.observe(ele, {attributes: true});
 
             res = function (fn) {
                 callbacks.push(fn);
                 ele.setAttribute(
-                    attributeName, 
+                    NAME,
                     Date.now ? Date.now() : (new Date()).getTime()
                 );
+            };
+        }
+        // it's faster than `setTimeout`
+        else if (typeof window.postMessage == 'function') {
+            window.addEventListener(
+                'message',
+                function (e) {
+                    if (e.source == window && e.data == NAME) {
+                        callback();
+                    }
+                },
+                false
+            );
+
+            res = function (fn) {
+                callbacks.push(fn);
+                window.postMessage(NAME, '*');
             };
         }
         // for older browser
