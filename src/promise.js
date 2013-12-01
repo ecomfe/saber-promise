@@ -266,7 +266,7 @@ define(function () {
             ? resolver.fulfillList
             : resolver.rejectList;
 
-        fireGlobalEvent(resolver);
+        emitGlobalEvent(resolver);
 
         if (items.length <= 0 ) {
             return;
@@ -352,15 +352,13 @@ define(function () {
      * @param {Resolver} resolver
      * @param {string} type 事件类型
      */
-    function fireGlobalEvent(resolver) {
+    function emitGlobalEvent(resolver) {
         var type = resolver.status == STATUS.FULFILLED 
                     ? 'resolve' 
                     : 'reject';
 
         if (globalEvent) {
-            Resolver.emit(type, {
-                data: resolver.data
-            });
+            Resolver.emit(type, resolver.data);
         }
     }
 
@@ -455,6 +453,41 @@ define(function () {
         fn(resolver);
         return resolver.promise();
     };
+
+    /**
+     * 创建处于`rejected`状态的Promise对象
+     *
+     * @public
+     * @param {string} reason
+     * @return {Promise}
+     */
+    Resolver.rejected = function (reason) {
+        return this.promise(function (resolver) {
+            resolver.reject(reason);
+        });
+    };
+
+    /**
+     * 创建处于`fulfill`状态的Promise对象
+     *
+     * @public
+     * @param {*} data
+     * @return {Promise}
+     */
+    Resolver.fulfilled = function (data) {
+        return this.promise(function (resolver) {
+            resolver.fulfill(data);
+        });
+    };
+
+    /**
+     * 创建处于`fulfill`状态的Promise对象
+     *
+     * @public
+     * @param {*} data
+     * @return {Promise}
+     */
+    Resolver.resolved = Resolver.fulfilled;
 
     /**
      * fulfill

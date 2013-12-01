@@ -44,7 +44,7 @@ doSomeThing().then(
 
 ### Resolver 实例
 
-有三种状态：`pending`、`resolved`、`rejected`。只能从`pending`变为`resolved`或者从`pending`变为`rejected`，并且状态只能变更一次
+有三种状态：`pending`、`fulfilled`、`rejected`。只能从`pending`变为`fulfilled`或者从`pending`变为`rejected`，并且状态只能变更一次
 
 创建`Resolver`实例
 
@@ -54,7 +54,7 @@ var resolver = new Resolver();
 
 #### resolver.fulfill( data )
 
-将状态由`pending`变更为`resolved`，并将`data`作为第一个参数触发所有已注册的`onFulfilled`回调函数
+将状态由`pending`变更为`fulfilled`，并将`data`作为第一个参数触发所有已注册的`onFulfilled`回调函数
 
 ```javascript
 var resolver = new Resolver();
@@ -87,10 +87,10 @@ resolver.reject('找不到对象');
 
 #### promise.then( onFulfilled, onRejected )
 
-注册`已完成`和`已拒绝`状态的回调
+注册`fulfilled`和`rejected`状态的回调
 
-* `onFulfilled` `已完成`状态回调
-* `onRejected` `已拒绝`状态回调
+* `onFulfilled` `fulfilled`状态回调
+* `onRejected` `rejected`状态回调
 
 返回`Promise`实例
 
@@ -98,7 +98,7 @@ resolver.reject('找不到对象');
 
 #### Resolver.promise( fn )
 
-创建`Promise`对象的快捷方式
+同步创建`Promise`对象
 
 * `fn` `function(resolver)` 处理函数
 
@@ -114,9 +114,25 @@ promise.then(function () {
 });
 ```
 
+#### Resolver.fulfilled( data )
+
+创建已经处于`fulfilled`状态的`Promise`对象
+
+* `data` `*`
+
+#### Resolver.resolved( data )
+
+与`.fulfilled()` 完全相同
+
+#### Resolver.rejected( reason )
+
+创建已经处于`rejected`状态的`Promise`对象
+
+* `reason` `*`
+
 #### Resolver.all( promises )
 
-关联多个`promise`对象，返回的`promise`在所有参数都`resolved`时达到`resolved`状态，如果参数中的有任意`promise`对象`rejected`则立即达到`rejected`状态
+关联多个`promise`对象，返回的`promise`在所有`Promise`对象参数都`fulfilled`时达到`fulfilled`状态，如果参数中的有任意`promise`对象`rejected`则立即达到`rejected`状态
 
 * `promises` `Array.<promise> | ...promise` 可以是数组参数或者多个`promise`对象
 
@@ -131,7 +147,14 @@ promise.then(function () {
 ```javascript
 var Emitter = require('saber-emitter');
 Resolver.enableGlobalEvent(Emitter);
-Resolver.on('resolve', function () {
+
+// resolved事件
+Resolver.on('resolve', function (data) {
+    ...
+});
+
+// rejected事件
+Resolver.on('reject', function (reason) {
     ...
 });
 ```

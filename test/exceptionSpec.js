@@ -66,7 +66,7 @@ describe('global event', function () {
 
         setTimeout(function () {
             expect(handler).toHaveBeenCalled();
-            expect(handler.mostRecentCall.args[0].data).toBe(123);
+            expect(handler.mostRecentCall.args[0]).toBe(123);
         }, 0);
 
         Resolver.un('resolve', handler);
@@ -90,7 +90,7 @@ describe('global event', function () {
 
         setTimeout(function () {
             expect(handler).toHaveBeenCalled();
-            expect(handler.mostRecentCall.args[0].data).toBe(123);
+            expect(handler.mostRecentCall.args[0]).toBe(123);
         }, 0);
 
         Resolver.un('reject', handler);
