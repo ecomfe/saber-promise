@@ -174,6 +174,8 @@ Resolver.on('reject', function (reason) {
     $ npm install
     $ npm test
 
+基本性能测试请参考[这里](https://github.com/treelite/promise-perf-tests)
+
 ===
 
 [![Saber](https://f.cloud.github.com/assets/157338/1485433/aeb5c72a-4714-11e3-87ae-7ef8ae66e605.png)](http://ecomfe.github.io/saber/)
