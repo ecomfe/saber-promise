@@ -47,7 +47,7 @@ describe('Resolver', function () {
     });
 
     // .resolved() spec
-    it('.resolved() return promise had resolved', function () {
+    it('.resolved() return promise had resolved', function (done) {
         var param = 'w';
         var promise = Resolver.resolved(param);
 
@@ -59,11 +59,12 @@ describe('Resolver', function () {
             expect(resolvedHandler).toHaveBeenCalled();
             expect(resolvedHandler).toHaveBeenCalledWith(param);
             expect(rejectedHandler).not.toHaveBeenCalled();
+            done();
         }, 0);
     });
 
     // .rejected() spec
-    it('.rejected() return promise had rejected', function () {
+    it('.rejected() return promise had rejected', function (done) {
         var reason = 'error';
         var promise = Resolver.rejected(reason);
 
@@ -75,6 +76,7 @@ describe('Resolver', function () {
             expect(rejectedHandler).toHaveBeenCalled();
             expect(rejectedHandler).toHaveBeenCalledWith(reason);
             expect(resolvedHandler).not.toHaveBeenCalled();
+            done();
         }, 0);
     });
 

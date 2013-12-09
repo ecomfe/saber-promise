@@ -182,6 +182,7 @@ define(function () {
                     throw e;
                 }
                 else if (!called) {
+                    emitExceptionEvent(e);
                     resolver.reject(e);
                 }
             }
@@ -216,6 +217,7 @@ define(function () {
             }
             catch (e) {
                 if (captureException) {
+                    emitExceptionEvent(e);
                     resolver.reject(e);
                 }
                 else {
@@ -359,6 +361,12 @@ define(function () {
 
         if (globalEvent) {
             Resolver.emit(type, resolver.data);
+        }
+    }
+
+    function emitExceptionEvent(e) {
+        if (globalEvent) {
+            Resolver.emit('exception', e);
         }
     }
 

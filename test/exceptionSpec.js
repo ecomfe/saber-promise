@@ -103,4 +103,41 @@ describe('global event', function () {
         }, 0);
     });
 
+    it('emit `exception` when a caller throws error', function (done) {
+        var excHandler = jasmine.createSpy('excHandler');
+        var rejHandler = jasmine.createSpy('rejHandler');
+
+        Resolver.on('exception', excHandler);
+        Resolver.on('reject', rejHandler);
+
+        var resolver = new Resolver();
+        var promise = resolver.promise();
+        resolver.reject(123);
+
+        function finish() {
+            Resolver.un('exception', excHandler);
+            Resolver.un('reject', rejHandler);
+            done();
+        }
+
+        setTimeout(function () {
+            expect(rejHandler).toHaveBeenCalled();
+            expect(rejHandler.mostRecentCall.args[0]).toBe(123);
+            expect(excHandler).not.toHaveBeenCalled();
+
+            promise.then(null, function () {
+                throw new Error();
+            });
+
+            setTimeout(function () {
+                expect(excHandler).toHaveBeenCalled();
+                expect(
+                    excHandler.callCount >= 1
+                    && excHandler.mostRecentCall.args[0] instanceof Error).toBeTruthy();
+                expect(rejHandler.callCount).toBe(2);
+                finish();
+            }, 0);
+
+        }, 0);
+    });
 });
