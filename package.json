@@ -1,6 +1,6 @@
 {
   "name": "saber-promise",
-  "version": "0.1.2-beta.3",
+  "version": "0.1.2",
   "description": "适用于移动端的Promise/A+实现",
   "main": "promise",
   "maintainers": [
@@ -15,7 +15,7 @@
   "repository": "git://github.com/ecomfe/saber-promise.git",
   "license": "BSD",
   "devDependencies": {
-    "promises-aplus-tests": "~2.0.1",
-    "jasmine-node": "~1.11.0"
+    "promises-aplus-tests": "~2.0.4",
+    "jasmine-node": "~1.14.2"
   }
 }
