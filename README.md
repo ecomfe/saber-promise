@@ -1,4 +1,4 @@
-# saber-promise
+# saber-promise [![Build Status](https://travis-ci.org/ecomfe/saber-promise.png)](https://travis-ci.org/ecomfe/saber-promise)
 
 <del><a href="http://baike.baidu.com/view/8420590.htm" target="_blank">吾王</a>的</del>移动端的[Promise/A+](http://promises-aplus.github.io/promises-spec/)实现，遵循**1.1**规范
 
