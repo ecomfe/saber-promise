@@ -16,7 +16,6 @@ define(function () {
         REJECTED: 2
     };
 
-    
     /**
      * 是否捕获异常
      * 规范要求捕获所有异常 see #2.2.7.2
@@ -26,7 +25,7 @@ define(function () {
      * 关闭异常捕获简单粗暴管事儿
      *
      * 更优雅点的方式是`Resolver.on('reject', fn)`注册全局事件来统一处理异常
-     * 
+     *
      *
      * @type {boolean}
      */
@@ -42,7 +41,7 @@ define(function () {
 
     /**
      * 延迟执行
-     * 
+     *
      * @inner
      */
     var nextTick = (function () {
@@ -63,16 +62,16 @@ define(function () {
         // nodejs support this
         // only IE on browser, currently
         // https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/setImmediate/Overview.html#processingmodel
-        if (typeof setImmediate == 'function') {
+        if (typeof setImmediate === 'function') {
             res = setImmediate;
         }
         // for modern browser
-        else if (Observer = window.MutationObserver 
+        else if (Observer = window.MutationObserver
             || window.webKitMutationObserver
         ) {
             var observer = new Observer(function (mutations) {
                 var item = mutations[0];
-                if (item.attributeName == NAME) {
+                if (item.attributeName === NAME) {
                     callback();
                 }
             });
@@ -88,11 +87,11 @@ define(function () {
             };
         }
         // it's faster than `setTimeout`
-        else if (typeof window.postMessage == 'function') {
+        else if (isFunction(window.postMessage)) {
             window.addEventListener(
                 'message',
                 function (e) {
-                    if (e.source == window && e.data == NAME) {
+                    if (e.source === window && e.data === NAME) {
                         callback();
                     }
                 },
@@ -122,8 +121,7 @@ define(function () {
      * @return {boolean}
      */
     function isFunction(value) {
-        return '[object Function]' 
-            == Object.prototype.toString.call(value);
+        return typeof value === 'function';
     }
 
     /**
@@ -134,14 +132,14 @@ define(function () {
      * @return {boolean}
      */
     function isObject(value) {
-        return '[object Object]' 
-            == Object.prototype.toString.call(value);
+        return '[object Object]'
+            === Object.prototype.toString.call(value);
     }
 
     /**
      * 使用value确定resolver的状态
      *
-     * @param {Resolver}
+     * @param {Resolver} resolver
      * @param {Object} value
      */
     function resolve(resolver, value) {
@@ -158,7 +156,7 @@ define(function () {
                 if (isFunction(then)) {
                     // 可能抛异常
                     then.call(
-                        value, 
+                        value,
                         function (data) {
                             if (!called) {
                                 resolve(resolver, data);
@@ -238,7 +236,7 @@ define(function () {
      * @param {Function} callback
      */
     function addListener(resolver, status, callback) {
-        if (resolver.status == status) {
+        if (resolver.status === status) {
             // 设置延迟
             // 为了让then函数先返回再执行回调
             // see #2.2.4
@@ -248,10 +246,10 @@ define(function () {
                 }
             );
         }
-        else if (status == STATUS.FULFILLED) {
+        else if (status === STATUS.FULFILLED) {
             resolver.fulfillList.push(callback);
         }
-        else if (status == STATUS.REJECTED) {
+        else if (status === STATUS.REJECTED) {
             resolver.rejectList.push(callback);
         }
     }
@@ -264,13 +262,13 @@ define(function () {
      * @param {Object} resolver
      */
     function emit(resolver) {
-        var items = resolver.status == STATUS.FULFILLED
+        var items = resolver.status === STATUS.FULFILLED
             ? resolver.fulfillList
             : resolver.rejectList;
 
         emitGlobalEvent(resolver);
 
-        if (items.length <= 0 ) {
+        if (!items.length) {
             return;
         }
 
@@ -294,8 +292,8 @@ define(function () {
      *
      * @inner
      * @param {Resolver} resolver
-     * @param {Function} onFulfilled 
-     * @param {Function} onRejected 
+     * @param {Function} onFulfilled
+     * @param {Function} onRejected
      * @return {Promise}
      */
     function then(resolver, onFulfilled, onRejected) {
@@ -307,7 +305,7 @@ define(function () {
         }
         else {
             // not function
-            // 'return promise' must fulfill with the same value 
+            // 'return promise' must fulfill with the same value
             // when 'main promise' is resolved
             // see #2.2.7.3
             onFulfilled = function (data) {
@@ -321,7 +319,7 @@ define(function () {
         }
         else {
             // not function
-            // 'return promise' must reject with the same reason 
+            // 'return promise' must reject with the same reason
             // when 'main promise' is rejected
             // see #2.2.7.4
             onRejected = function (reason) {
@@ -355,8 +353,8 @@ define(function () {
      * @param {string} type 事件类型
      */
     function emitGlobalEvent(resolver) {
-        var type = resolver.status == STATUS.FULFILLED 
-                    ? 'resolve' 
+        var type = resolver.status === STATUS.FULFILLED
+                    ? 'resolve'
                     : 'reject';
 
         if (globalEvent) {
@@ -504,7 +502,7 @@ define(function () {
      * @param {*} data
      */
     Resolver.prototype.fulfill = function (data) {
-        if (this.status != STATUS.PENDING) {
+        if (this.status !== STATUS.PENDING) {
             return;
         }
 
@@ -528,10 +526,10 @@ define(function () {
      * @param {*} reason
      */
     Resolver.prototype.reject = function (reason) {
-        if (this.status != STATUS.PENDING) {
+        if (this.status !== STATUS.PENDING) {
             return;
         }
-        
+
         this.data = reason;
         this.status = STATUS.REJECTED;
         emit(this);
