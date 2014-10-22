@@ -15,7 +15,7 @@
   "repository": "git://github.com/ecomfe/saber-promise.git",
   "license": "BSD",
   "devDependencies": {
-    "promises-aplus-tests": "~2.0.4",
+    "promises-aplus-tests": "^2.1.0",
     "jasmine-node": "~1.14.2"
   }
 }
