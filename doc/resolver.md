@@ -47,3 +47,5 @@ resolver.reject('找不到对象');
 ### promise()
 
 返回对应的Promise对象
+
+* _return_ `{{Promise}`
