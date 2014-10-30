@@ -8,7 +8,7 @@ saber-promise [![Build Status](https://travis-ci.org/ecomfe/saber-promise.png)](
 通过 [edp](https://github.com/ecomfe/edp) 引入模块：
 
 ```sh
-edp import saber-promise
+$ edp import saber-promise
 ```
 
 ## Usage
@@ -18,25 +18,37 @@ var Resolver = require('saber-promise');
 
 function doSomeThing() {
     var resolver = new Resolver();
+    // 做一些异步操作
     doSync(
         function (result) {
+            // 异步操作成功了
             resolver.fulfill(result);
         },
         function () {
+            // 异步操作失败了
             resolver.reject('connect error');
         }
     );
+    // 返回Promise对象
     return resolver.promise();
 }
 
-doSomeThing().then(
-    function (result) {
-        alert(result);
-    },
-    function (reason) {
-        alert(reason);
-    }
-);
+doSomeThing()
+    // 对异步结果进行处理
+    .then(
+        // 处理成功的情况
+        function (result) {
+            console.log(result);
+        },
+        // 处理失败的情况
+        function (reason) {
+            console.log(reason);
+        }
+    )
+    // 不管成功还是失败都提示操作成功
+    .then(function () {
+        console.log('操作完成')
+    });
 ```
 
 ### About Exception
