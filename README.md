@@ -154,7 +154,7 @@ rejected事件 任何[Resolver](doc/resolver.md)对象处于`rejected`时触发
 ### Classes
 
 * [Resolver](doc/resolver.md) 操作的状态保持对象，用于产生[Promise](promise.md)对象
-* [Promise](doc/promise.md) 由[Resolver](resolver.md)对象产生，用于表示一个操作的结果
+* [Promise](doc/promise.md) 由[Resolver](resolver.md)对象产生，用于表示一个正在进行的操作
 
 ## Test
 

@@ -1,7 +1,7 @@
 Promise
 ===
 
-由[Resolver](resolver.md)对象产生，用于表示一个操作的结果
+由[Resolver](resolver.md)对象产生，用于表示一个正在进行的操作
 
 ## Methods
 
