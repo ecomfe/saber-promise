@@ -52,8 +52,9 @@ define(function () {
         var NAME = 'promise';
 
         function callback() {
+            var i;
             var len = callbacks.length;
-            for (var i = 0; i < len; i++) {
+            for (i = 0; i < len; i++) {
                 callbacks[i]();
             }
             callbacks.splice(0, i);
