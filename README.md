@@ -1,37 +1,54 @@
-# saber-promise [![Build Status](https://travis-ci.org/ecomfe/saber-promise.png)](https://travis-ci.org/ecomfe/saber-promise)
+saber-promise [![Build Status](https://travis-ci.org/ecomfe/saber-promise.png)](https://travis-ci.org/ecomfe/saber-promise)
+===
 
 <del><a href="http://baike.baidu.com/view/8420590.htm" target="_blank">吾王</a>的</del>移动端的[Promise/A+](http://promises-aplus.github.io/promises-spec/)实现，遵循**1.1**规范
 
+## Installation
+
+通过 [edp](https://github.com/ecomfe/edp) 引入模块：
+
+```sh
+$ edp import saber-promise
+```
+
 ## Usage
 
-通过`edp`引入模块
-
-    $ edp import saber-promise
-
-```javascript
+```js
 var Resolver = require('saber-promise');
 
 function doSomeThing() {
     var resolver = new Resolver();
+    // 做一些异步操作
     doSync(
         function (result) {
+            // 异步操作成功了
             resolver.fulfill(result);
         },
         function () {
+            // 异步操作失败了
             resolver.reject('connect error');
         }
     );
+    // 返回Promise对象
     return resolver.promise();
 }
 
-doSomeThing().then(
-    function (result) {
-        alert(result);
-    },
-    function (reason) {
-        alert(reason);
-    }
-);
+doSomeThing()
+    // 对异步结果进行处理
+    .then(
+        // 处理成功的情况
+        function (result) {
+            console.log(result);
+        },
+        // 处理失败的情况
+        function (reason) {
+            console.log(reason);
+        }
+    )
+    // 不管成功还是失败都提示操作成功
+    .then(function () {
+        console.log('操作完成')
+    });
 ```
 
 ### About Exception
@@ -42,109 +59,68 @@ doSomeThing().then(
 
 ## API
 
-### Resolver 实例
+* [Methods](#methods)
+* [Events](#events)
+* [Classes](#classes)
 
-有三种状态：`pending`、`fulfilled`、`rejected`。只能从`pending`变为`fulfilled`或者从`pending`变为`rejected`，并且状态只能变更一次
+### Methods
 
-创建`Resolver`实例
+#### promise(fn)
 
-```javascript
-var resolver = new Resolver();
-```
+创建`Promise`对象
 
-#### resolver.fulfill( data )
+* **fn** `{Function}` 构造函数，第一个参数是[Resolver](doc/resolver.md)对象
+* _return_ `{Promise}` [Promise](doc/promise.md)对象
 
-将状态由`pending`变更为`fulfilled`，并将`data`作为第一个参数触发所有已注册的`onFulfilled`回调函数
-
-```javascript
-var resolver = new Resolver();
-resolver.fulfill(100);
-```
-
-
-多次调用处于非`pending`状态的`Resolver`实例的`fulfill`方法是无效的
-
-#### resolver.resolve( data )
-
-完全等同于 `Resolver.fulfill`，改个比较通用的名字...(&gt;_&lt;)...
-
-#### resolver.reject( reason )
-
-将状态由`pending`变更为`rejected`，并将`reason`作为第一个参数触发所有已注册的`onRejected`回调函数
-
-```javascript
-var resolver = new Resolver();
-resolver.reject('找不到对象');
-```
-
-多次调用处于非`pending`状态的`Resolver`实例的`reject`方法是无效的
-
-#### resolver.promise()
-
-返回对应的Promise对象
-
-### Promise 实例
-
-#### promise.then( onFulfilled, onRejected )
-
-注册`fulfilled`和`rejected`状态的回调
-
-* `onFulfilled` `fulfilled`状态回调
-* `onRejected` `rejected`状态回调
-
-返回`Promise`实例
-
-### Resolver
-
-#### Resolver.promise( fn )
-
-同步创建`Promise`对象
-
-* `fn` `function(resolver)` 处理函数
-
-```javascript
+```js
 var promise = Resolver.promise(function (resolver) {
-        setTimeout(function () {
-            resolver.resolve();
-        }, 0);
-    });
+    setTimeout(function () {
+        resolver.resolve();
+    }, 0);
+});
 
 promise.then(function () {
     ...
 });
 ```
 
-#### Resolver.fulfilled( data )
+#### fulfilled(data)
 
-创建已经处于`fulfilled`状态的`Promise`对象
+创建已经处于`fulfilled`状态的[Promise](doc/promise.md)对象
 
-* `data` `*`
+* **data** `{*}` 数据
+* _return_ `{Promise}` [Promise](doc/promise.md)对象
 
-#### Resolver.resolved( data )
+#### resolved(data)
 
-与`.fulfilled()` 完全相同
+创建已经处于`fulfilled`状态的[Promise](doc/promise.md)对象，与[fulfilled](#fulfilleddata)完全相同，别名而已...
 
-#### Resolver.rejected( reason )
+* **data** `{*}` 数据
+* _return_ `{Promise}` [Promise](doc/promise.md)对象
+
+#### rejected(reason)
 
 创建已经处于`rejected`状态的`Promise`对象
 
-* `reason` `*`
+* **reason** `{*}` 失败原因
+* _return_ `{Promise}` [Promise](doc/promise.md)对象
 
-#### Resolver.all( promises )
+#### all(promises)
 
-关联多个`promise`对象，返回的`promise`在所有`Promise`对象参数都`fulfilled`时达到`fulfilled`状态，如果参数中的有任意`promise`对象`rejected`则立即达到`rejected`状态
+关联多个[Promise](doc/promise.md)对象并返回一个新的`Promise`对象，返回的`Promise`在所有被关联的`Promise`对象都`fulfilled`时达到`fulfilled`状态，如果参数中的有任意`promise`对象`rejected`则立即达到`rejected`状态
 
-* `promises` `Array.<promise> | ...promise` 可以是数组参数或者多个`promise`对象
+* **promises** `{Array.<promise>|...promise}` 待关联的`Promise`对象，可以是数组参数或者多个`promise`对象
+* _return_ `{Promise}` [Promise](doc/promise.md)对象
 
-#### Resolver.enableGlobalEvent( Emitter )
+#### enableGlobalEvent(Emitter)
 
 **非标准API** 启动全局事件
 
-* `Emitter` `{Object}` 事件发射器
+* **Emitter** `{Object}` 事件发射器
 
-全局事件是默认关闭的，`saber-promise`不强依赖于`saber-emitter`或者任何事件发射器，所以在开启全局事件时需要传入一个事件发射器来启用自定义事件，建议使用`saber-emitter`，如下：
+全局事件是默认关闭的，`saber-promise`不强依赖于[saber-emitter](https://github.com/ecomfe/saber-emitter)或者任何其它事件发射器，所以在开启全局事件时需要传入一个事件发射器来启用自定义事件，建议使用[saber-emitter](https://github.com/ecomfe/saber-emitter)，如下：
 
-```javascript
+```js
 var Emitter = require('saber-emitter');
 Resolver.enableGlobalEvent(Emitter);
 
@@ -159,13 +135,38 @@ Resolver.on('reject', function (reason) {
 });
 ```
 
-#### Resolver.disableExceptionCapture()
+#### disableExceptionCapture()
 
-**非标准API** 禁用异常处理，默认时启动的。如果全局事件都不想监控了，用这个可以直接关闭异常处理，方便调试，简单粗暴～
+**非标准API**
 
-#### Resolver.enableExceptionCapture()
+禁用异常处理，默认时启动的。如果全局事件都不想监控了，用这个可以直接关闭异常处理，方便调试，简单粗暴～
 
-**非标准API** 启用异常处理
+#### enableExceptionCapture()
+
+**非标准API**
+
+启用异常处理
+
+### Events
+
+注册任何全局事件前需要先启用全局事件，具体请参考[enableGlobalEvent(Emitter)](#enableglobaleventemitter)
+
+#### resolve
+
+resolved事件 任何[Resolver](doc/resolver.md)对象处于`fulfilled`时触发
+
+* **data** `{*}` 数据
+
+#### reject
+
+rejected事件 任何[Resolver](doc/resolver.md)对象处于`rejected`时触发
+
+* **reason** `{*}` 失败原因
+
+### Classes
+
+* [Resolver](doc/resolver.md) 操作的状态保持对象，用于产生[Promise](promise.md)对象
+* [Promise](doc/promise.md) 由[Resolver](resolver.md)对象产生，用于表示一个正在进行的操作
 
 ## Test
 
@@ -175,7 +176,3 @@ Resolver.on('reject', function (reason) {
     $ npm test
 
 基本性能测试请参考[这里](https://github.com/treelite/promise-perf-tests)
-
-===
-
-[![Saber](https://f.cloud.github.com/assets/157338/1485433/aeb5c72a-4714-11e3-87ae-7ef8ae66e605.png)](http://ecomfe.github.io/saber/)

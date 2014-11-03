@@ -15,17 +15,11 @@ global.define = function (def) {
 require('../src/promise');
 
 exports.resolved = function (value) {
-    var resolver = new Resolver();
-
-    resolver.resolve(value);
-    return resolver.promise();
+    return Resolver.resolved(value);
 };
 
 exports.rejected = function (reason) {
-    var resolver = new Resolver();
-
-    resolver.reject(reason);
-    return resolver.promise();
+    return Resolver.rejected(reason);
 };
 
 exports.deferred = function () {
