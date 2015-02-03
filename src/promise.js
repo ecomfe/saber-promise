@@ -3,7 +3,7 @@
  * @author treelite(c.xinle@gmail.com)
  */
 
-define(function () {
+(function () {
 
     /**
      * resolver的状态
@@ -547,5 +547,12 @@ define(function () {
         return createPromise(this);
     };
 
-    return Resolver;
-});
+    // Export
+    if (typeof exports === 'object' && typeof module === 'object') {
+        exports = module.exports = Resolver;
+    }
+    else if (typeof define === 'function' && define.amd) {
+        define(Resolver);
+    }
+
+})();
