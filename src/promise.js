@@ -552,7 +552,9 @@
         exports = module.exports = Resolver;
     }
     else if (typeof define === 'function' && define.amd) {
-        define(Resolver);
+        define(function () {
+            return Resolver;
+        });
     }
 
 })();
