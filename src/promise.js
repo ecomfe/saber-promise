@@ -250,7 +250,7 @@
             // 设置延迟
             // 为了让then函数先返回再执行回调
             // see #2.2.4
-            nextTick(
+            Resolver.nextTick(
                 function () {
                     callback(resolver.data);
                 }
@@ -285,7 +285,7 @@
         // 触发注册的回调函数必须
         // 在状态改变完成后
         // see #2.2.2 #2.2.3 #2.2.4
-        nextTick(
+        Resolver.nextTick(
             function () {
                 var item;
                 while (item = items.shift()) {
@@ -389,6 +389,9 @@
         this.fulfillList = [];
         this.rejectList = [];
     }
+
+    // 导出nextTick 方便重载
+    Resolver.nextTick = nextTick;
 
     /**
      * 启用全局事件
