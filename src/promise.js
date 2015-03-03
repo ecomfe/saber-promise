@@ -60,13 +60,21 @@
             callbacks.splice(0, i);
         }
 
-        // nodejs support this
-        // only IE on browser, currently
+        // For node env
+        if (typeof process !== 'undefined'
+            && process !== null
+            && typeof process.nextTick === 'function'
+        ) {
+            res = function (fn) {
+                return process.nextTick(fn);
+            };
+        }
+        // Only IE on browser, currently
         // https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/setImmediate/Overview.html#processingmodel
-        if (typeof setImmediate === 'function') {
+        else if (typeof setImmediate === 'function') {
             res = setImmediate;
         }
-        // for modern browser
+        // For modern browser
         else if (Observer = window.MutationObserver
             || window.webKitMutationObserver
         ) {
@@ -87,7 +95,7 @@
                 );
             };
         }
-        // it's faster than `setTimeout`
+        // It's faster than `setTimeout`
         else if (isFunction(window.postMessage)) {
             window.addEventListener(
                 'message',
@@ -104,7 +112,7 @@
                 window.postMessage(NAME, '*');
             };
         }
-        // for older browser
+        // For older browser
         else {
             res = function (fn) {
                 setTimeout(fn, 0);
