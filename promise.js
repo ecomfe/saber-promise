@@ -17,9 +17,9 @@ Resolver.rebas = function (app) {
     // 重载异步函数
     // 以保存请求上下文
     this.nextTick = function (fn) {
-        var context = app.getContext();
+        var id = app.stashContext();
         nextTick(function () {
-            app.setContext(context);
+            app.revertContext(id);
             fn();
         });
     };
