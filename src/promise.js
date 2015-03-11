@@ -144,51 +144,61 @@ define(function () {
      * @param {Object} value 值
      */
     function resolve(resolver, value) {
-        // 不再额外判断value是否是Promise对象
-        if (isObject(value) || isFunction(value)) {
-            // 保证resolvePromise与rejectPromise
-            // 只能被调用一次
-            // （不确定value是否是Promise对象）
-            // see #2.3.3.3.3
-            var called;
-            try {
-                // 可能抛异常
-                var then = value.then;
+        // 保证resolvePromise与rejectPromise
+        // 只能被调用一次
+        // （不确定value是否是Promise对象）
+        // see #2.3.3.3.3
+        var called;
+
+        function onFulfilled(data) {
+            if (!called) {
+                resolve(resolver, data);
+                called = true;
+            }
+        }
+
+        function onRejected(reason) {
+            if (!called) {
+                resolver.reject(reason);
+                called = true;
+            }
+        }
+
+        function work() {
+            var then;
+            // 不再额外判断value是否是Promise对象
+            if (isObject(value) || isFunction(value)) {
+                // 必须先保存对then对引用
+                // 官方的test spec中有检查对then的引用次数只能为1
+                then = value.then;
                 if (isFunction(then)) {
-                    // 可能抛异常
-                    then.call(
-                        value,
-                        function (data) {
-                            if (!called) {
-                                resolve(resolver, data);
-                                called = true;
-                            }
-                        },
-                        function (reason) {
-                            if (!called) {
-                                resolver.reject(reason);
-                                called = true;
-                            }
-                        }
-                    );
+                    then.call(value, onFulfilled, onRejected);
                 }
                 else {
-                    resolver.fulfill(value);
+                    then = null;
                 }
             }
+
+            if (!then) {
+                resolver.fulfill(value);
+            }
+        }
+
+        if (captureException) {
+            try {
+                work();
+            }
             catch (e) {
-                if (!captureException) {
-                    throw e;
-                }
-                else if (!called) {
+                if (!called) {
                     emitExceptionEvent(e);
                     resolver.reject(e);
                 }
             }
         }
         else {
-            resolver.fulfill(value);
+            work();
         }
+
     }
 
     /**
@@ -203,7 +213,8 @@ define(function () {
      */
     function wrapCallback(resolver, promise, callback) {
         return function (data) {
-            try {
+
+            function work() {
                 // 可能抛异常
                 var res = callback(data);
                 // 返回结果与当前的promise对象相同
@@ -215,15 +226,20 @@ define(function () {
 
                 resolve(resolver, res);
             }
-            catch (e) {
-                if (captureException) {
+
+            if (captureException) {
+                try {
+                    work();
+                }
+                catch (e) {
                     emitExceptionEvent(e);
                     resolver.reject(e);
                 }
-                else {
-                    throw e;
-                }
             }
+            else {
+                work();
+            }
+
         };
     }
 
