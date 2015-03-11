@@ -118,7 +118,7 @@ define(function () {
      * 函数判断
      *
      * @inner
-     * @param {*} value
+     * @param {*} value 变量
      * @return {boolean}
      */
     function isFunction(value) {
@@ -129,7 +129,7 @@ define(function () {
      * object判断
      *
      * @inner
-     * @param {*} value
+     * @param {*} value 变量
      * @return {boolean}
      */
     function isObject(value) {
@@ -140,55 +140,65 @@ define(function () {
     /**
      * 使用value确定resolver的状态
      *
-     * @param {Resolver} resolver
-     * @param {Object} value
+     * @param {Resolver} resolver resolver对象
+     * @param {Object} value 值
      */
     function resolve(resolver, value) {
-        // 不再额外判断value是否是Promise对象
-        if (isObject(value) || isFunction(value)) {
-            // 保证resolvePromise与rejectPromise
-            // 只能被调用一次
-            // （不确定value是否是Promise对象）
-            // see #2.3.3.3.3
-            var called;
-            try {
-                // 可能抛异常
-                var then = value.then;
+        // 保证resolvePromise与rejectPromise
+        // 只能被调用一次
+        // （不确定value是否是Promise对象）
+        // see #2.3.3.3.3
+        var called;
+
+        function onFulfilled(data) {
+            if (!called) {
+                resolve(resolver, data);
+                called = true;
+            }
+        }
+
+        function onRejected(reason) {
+            if (!called) {
+                resolver.reject(reason);
+                called = true;
+            }
+        }
+
+        function work() {
+            var then;
+            // 不再额外判断value是否是Promise对象
+            if (isObject(value) || isFunction(value)) {
+                // 必须先保存对then对引用
+                // 官方的test spec中有检查对then的引用次数只能为1
+                then = value.then;
                 if (isFunction(then)) {
-                    // 可能抛异常
-                    then.call(
-                        value,
-                        function (data) {
-                            if (!called) {
-                                resolve(resolver, data);
-                                called = true;
-                            }
-                        },
-                        function (reason) {
-                            if (!called) {
-                                resolver.reject(reason);
-                                called = true;
-                            }
-                        }
-                    );
+                    then.call(value, onFulfilled, onRejected);
                 }
                 else {
-                    resolver.fulfill(value);
+                    then = null;
                 }
             }
+
+            if (!then) {
+                resolver.fulfill(value);
+            }
+        }
+
+        if (captureException) {
+            try {
+                work();
+            }
             catch (e) {
-                if (!captureException) {
-                    throw e;
-                }
-                else if (!called) {
+                if (!called) {
                     emitExceptionEvent(e);
                     resolver.reject(e);
                 }
             }
         }
         else {
-            resolver.fulfill(value);
+            work();
         }
+
     }
 
     /**
@@ -196,13 +206,15 @@ define(function () {
      * 使其能根据回调的返回结果设置then返回的Resolver对象状态
      *
      * @inner
-     * @param {Resolver} resolver
-     * @param {Promise} promise
-     * @param {Function} callback
+     * @param {Resolver} resolver resolver对象
+     * @param {Promise} promise promise对象
+     * @param {Function} callback 回调函数
+     * @return {Function}
      */
     function wrapCallback(resolver, promise, callback) {
         return function (data) {
-            try {
+
+            function work() {
                 // 可能抛异常
                 var res = callback(data);
                 // 返回结果与当前的promise对象相同
@@ -214,15 +226,20 @@ define(function () {
 
                 resolve(resolver, res);
             }
-            catch (e) {
-                if (captureException) {
+
+            if (captureException) {
+                try {
+                    work();
+                }
+                catch (e) {
                     emitExceptionEvent(e);
                     resolver.reject(e);
                 }
-                else {
-                    throw e;
-                }
             }
+            else {
+                work();
+            }
+
         };
     }
 
@@ -232,9 +249,9 @@ define(function () {
      * 则“立即”调用回调函数
      *
      * @inner
-     * @param {Object} resolver
+     * @param {Object} resolver resolver对象
      * @param {number} status 回调函数类型 FULFILLED 或者 REJECTED
-     * @param {Function} callback
+     * @param {Function} callback 回调函数
      */
     function addListener(resolver, status, callback) {
         if (resolver.status === status) {
@@ -260,7 +277,7 @@ define(function () {
      * 根据状态，执行resolver的回调函数
      *
      * @inner
-     * @param {Object} resolver
+     * @param {Object} resolver resolver对象
      */
     function emit(resolver) {
         var items = resolver.status === STATUS.FULFILLED
@@ -292,9 +309,9 @@ define(function () {
      * 并返回新的Promise对象
      *
      * @inner
-     * @param {Resolver} resolver
-     * @param {Function} onFulfilled
-     * @param {Function} onRejected
+     * @param {Resolver} resolver resolver对象
+     * @param {Function} onFulfilled 成功回调
+     * @param {Function} onRejected 失败回调
      * @return {Promise}
      */
     function then(resolver, onFulfilled, onRejected) {
@@ -336,7 +353,8 @@ define(function () {
      * 创建Promise对象
      *
      * @inner
-     * @param {Resolver} resolver
+     * @param {Resolver} resolver resolver对象
+     * @return {Object}
      */
     function createPromise(resolver) {
         return {
@@ -350,7 +368,7 @@ define(function () {
      * 触发全局事件
      *
      * @inner
-     * @param {Resolver} resolver
+     * @param {Resolver} resolver resolver对象
      * @param {string} type 事件类型
      */
     function emitGlobalEvent(resolver) {
@@ -384,7 +402,7 @@ define(function () {
      * 启用全局事件
      *
      * @public
-     * @param {Emitter} Emitter
+     * @param {Emitter} Emitter 事件发射器
      */
     Resolver.enableGlobalEvent = function (Emitter) {
         Emitter.mixin(this);
@@ -412,8 +430,7 @@ define(function () {
     /**
      * all
      *
-     * @public
-     * @param {Array.<Promise>|...Promise} promises
+     * @param {...Promise|Array.<Promise>} promises promise参数
      * @return {Promise}
      */
     Resolver.all = function (promises) {
@@ -451,7 +468,7 @@ define(function () {
      * 创建promise
      *
      * @public
-     * @param {function(Resolver)} fn
+     * @param {function(Resolver)} fn 构造函数
      * @return {Promise}
      */
     Resolver.promise = function (fn) {
@@ -465,7 +482,7 @@ define(function () {
      * 创建处于`rejected`状态的Promise对象
      *
      * @public
-     * @param {string} reason
+     * @param {string} reason 错误原因
      * @return {Promise}
      */
     Resolver.rejected = function (reason) {
@@ -478,7 +495,7 @@ define(function () {
      * 创建处于`fulfill`状态的Promise对象
      *
      * @public
-     * @param {*} data
+     * @param {*} data 填充数据
      * @return {Promise}
      */
     Resolver.fulfilled = function (data) {
@@ -491,7 +508,7 @@ define(function () {
      * 创建处于`fulfill`状态的Promise对象
      *
      * @public
-     * @param {*} data
+     * @param {*} data 填充数据
      * @return {Promise}
      */
     Resolver.resolved = Resolver.fulfilled;
@@ -500,7 +517,7 @@ define(function () {
      * fulfill
      *
      * @public
-     * @param {*} data
+     * @param {*} data 填充数据
      */
     Resolver.prototype.fulfill = function (data) {
         if (this.status !== STATUS.PENDING) {
@@ -516,7 +533,7 @@ define(function () {
      * resolve
      *
      * @public
-     * @param {*} data
+     * @param {*} data 填充数据
      */
     Resolver.prototype.resolve = Resolver.prototype.fulfill;
 
@@ -524,7 +541,7 @@ define(function () {
      * reject
      *
      * @public
-     * @param {*} reason
+     * @param {*} reason 错误原因
      */
     Resolver.prototype.reject = function (reason) {
         if (this.status !== STATUS.PENDING) {
