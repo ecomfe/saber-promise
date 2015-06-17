@@ -1,5 +1,7 @@
-saber-promise [![Build Status](https://travis-ci.org/ecomfe/saber-promise.png)](https://travis-ci.org/ecomfe/saber-promise)
+saber-promise
 ===
+
+![Bower version](https://img.shields.io/bower/v/saber-promise.svg?style=flat-square) [![NPM version](https://img.shields.io/npm/v/saber-promise.svg?style=flat-square)](https://npmjs.org/package/saber-promise) [![Build Status](https://img.shields.io/travis/ecomfe/saber-promise/1.0/develop.svg?style=flat-square)](https://travis-ci.org/ecomfe/saber-promise) [![License](https://img.shields.io/npm/l/saber-promise.svg?style=flat-square)](./LICENSE) [![EFE Mobile Team](https://img.shields.io/badge/EFE-Mobile_Team-blue.svg?style=flat-square)](http://efe.baidu.com)
 
 <del><a href="http://baike.baidu.com/view/8420590.htm" target="_blank">吾王</a>的</del>移动端的[Promise/A+](http://promises-aplus.github.io/promises-spec/)实现，遵循**1.1**规范
 
