@@ -13,7 +13,7 @@
     "test": "jasmine-node --verbose test && promises-aplus-tests test/adapter"
   },
   "repository": "git://github.com/ecomfe/saber-promise.git",
-  "license": "BSD",
+  "license": "MIT",
   "devDependencies": {
     "promises-aplus-tests": "^2.1.0",
     "jasmine-node": "~1.14.2"
