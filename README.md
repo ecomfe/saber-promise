@@ -3,14 +3,20 @@ saber-promise
 
 ![Bower version](https://img.shields.io/bower/v/saber-promise.svg?style=flat-square) [![NPM version](https://img.shields.io/npm/v/saber-promise.svg?style=flat-square)](https://npmjs.org/package/saber-promise) [![Build Status](https://img.shields.io/travis/ecomfe/saber-promise.svg?style=flat-square)](https://travis-ci.org/ecomfe/saber-promise) [![License](https://img.shields.io/npm/l/saber-promise.svg?style=flat-square)](./LICENSE) [![EFE Mobile Team](https://img.shields.io/badge/EFE-Mobile_Team-blue.svg?style=flat-square)](http://efe.baidu.com)
 
-<del><a href="http://baike.baidu.com/view/8420590.htm" target="_blank">吾王</a>的</del>移动端的[Promise/A+](http://promises-aplus.github.io/promises-spec/)实现，遵循**1.1**规范
+<del><a href="http://baike.baidu.com/view/8420590.htm" target="_blank">吾王</a>的</del>移动端的 [Promise/A+](http://promises-aplus.github.io/promises-spec/) 实现，兼容 node 环境，遵循 **1.1** 规范
 
 ## Installation
 
-通过 [edp](https://github.com/ecomfe/edp) 引入模块：
+移动端环境下通过 [edp](https://github.com/ecomfe/edp) 引入模块：
 
 ```sh
 $ edp import saber-promise
+```
+
+node 环境下通过 `npm` 引入模块：
+
+```sh
+$ npm install saber-promise --save
 ```
 
 ## Usage
@@ -55,9 +61,9 @@ doSomeThing()
 
 ### About Exception
 
-规范要求捕获并处理所有的异常[#2.2.7.2](http://promisesaplus.com/#point-50)，在项目开发中可能会经常遇到非预期的异常被自动处理而导致无从跟踪，这些错误基本都是程序级别的书写错误而非可预期的业务逻辑错误，一般都不会有相应的`reject`处理。针对这种情况提供了全局事件：`reject`与`resolve`来监控处理（需要先调用`Resolver.enableGlobalEvent()`启用全局事件），更暴力一些还可以在**debug过程**中使用`Resolver.disableExceptionCapture()`来直接关闭异常处理，方便查找问题。
+规范要求捕获并处理所有的异常（[#2.2.7.2](http://promisesaplus.com/#point-50)），在项目开发中可能会经常遇到非预期的异常被自动处理而导致无从跟踪，这些错误基本都是程序级别的书写错误而非可预期的业务逻辑错误，一般都不会有相应的 `reject` 处理。针对这种情况提供了全局事件：`reject` 与 `resolve` 来监控处理（需要先调用 [Resolver.enableGlobalEvent()](#enableglobaleventemitter) 启用全局事件），更暴力一些还可以在 **开发环境** 中使用 `Resolver.disableExceptionCapture()` 来直接关闭异常处理，方便查找问题。
 
-**警告** 异常相关的API都是**非标准的**，只建议在调试阶段使用，这些API在未来某版本中可能会被废除
+**警告** 异常相关的 API 都是**非标准的**，只建议在调试阶段使用，这些 API 在未来某版本中可能会被废除
 
 ## API
 
@@ -71,8 +77,8 @@ doSomeThing()
 
 创建`Promise`对象
 
-* **fn** `{Function}` 构造函数，第一个参数是[Resolver](doc/resolver.md)对象
-* _return_ `{Promise}` [Promise](doc/promise.md)对象
+* **fn** `{Function}` 构造函数，第一个参数是 [Resolver](doc/resolver.md) 对象
+* _return_ `{Promise}` [Promise](doc/promise.md) 对象
 
 ```js
 var promise = Resolver.promise(function (resolver) {
@@ -88,31 +94,31 @@ promise.then(function () {
 
 #### fulfilled(data)
 
-创建已经处于`fulfilled`状态的[Promise](doc/promise.md)对象
+创建已经处于 `fulfilled` 状态的 [Promise](doc/promise.md) 对象
 
 * **data** `{*}` 数据
-* _return_ `{Promise}` [Promise](doc/promise.md)对象
+* _return_ `{Promise}` [Promise](doc/promise.md) 对象
 
 #### resolved(data)
 
-创建已经处于`fulfilled`状态的[Promise](doc/promise.md)对象，与[fulfilled](#fulfilleddata)完全相同，别名而已...
+创建已经处于 `fulfilled` 状态的 [Promise](doc/promise.md) 对象，与 [fulfilled](#fulfilleddata) 完全相同，别名而已...
 
 * **data** `{*}` 数据
-* _return_ `{Promise}` [Promise](doc/promise.md)对象
+* _return_ `{Promise}` [Promise](doc/promise.md) 对象
 
 #### rejected(reason)
 
-创建已经处于`rejected`状态的`Promise`对象
+创建已经处于 `rejected` 状态的 [Promise](doc/promise.md) 对象
 
 * **reason** `{*}` 失败原因
-* _return_ `{Promise}` [Promise](doc/promise.md)对象
+* _return_ `{Promise}` [Promise](doc/promise.md) 对象
 
 #### all(promises)
 
-关联多个[Promise](doc/promise.md)对象并返回一个新的`Promise`对象，返回的`Promise`在所有被关联的`Promise`对象都`fulfilled`时达到`fulfilled`状态，如果参数中的有任意`promise`对象`rejected`则立即达到`rejected`状态
+关联多个 [Promise](doc/promise.md) 对象并返回一个新的 `Promise` 对象，返回的 `Promise` 在所有被关联的 `Promise` 对象都 `fulfilled` 时达到 `fulfilled` 状态，如果有任意 `promise` 对象 `rejected` 则立即达到 `rejected` 状态
 
-* **promises** `{Array.<promise>|...promise}` 待关联的`Promise`对象，可以是数组参数或者多个`promise`对象
-* _return_ `{Promise}` [Promise](doc/promise.md)对象
+* **promises** `{Array.<promise>|...promise}` 待关联的 `Promise` 对象，可以是数组参数或者多个 `Promise` 对象
+* _return_ `{Promise}` [Promise](doc/promise.md) 对象
 
 #### enableGlobalEvent(Emitter)
 
@@ -120,7 +126,7 @@ promise.then(function () {
 
 * **Emitter** `{Object}` 事件发射器
 
-全局事件是默认关闭的，`saber-promise`不强依赖于[saber-emitter](https://github.com/ecomfe/saber-emitter)或者任何其它事件发射器，所以在开启全局事件时需要传入一个事件发射器来启用自定义事件，建议使用[saber-emitter](https://github.com/ecomfe/saber-emitter)，如下：
+全局事件是默认关闭的，`saber-promise` 不强依赖于 [saber-emitter](https://github.com/ecomfe/saber-emitter) 或者任何其它事件发射器，所以在开启全局事件时需要传入一个事件发射器来启用自定义事件，建议使用 [saber-emitter](https://github.com/ecomfe/saber-emitter)，如下：
 
 ```js
 var Emitter = require('saber-emitter');
@@ -139,40 +145,40 @@ Resolver.on('reject', function (reason) {
 
 #### disableExceptionCapture()
 
-**非标准API**
+**非标准 API**
 
 禁用异常处理，默认时启动的。如果全局事件都不想监控了，用这个可以直接关闭异常处理，方便调试，简单粗暴～
 
 #### enableExceptionCapture()
 
-**非标准API**
+**非标准 API**
 
 启用异常处理
 
 ### Events
 
-注册任何全局事件前需要先启用全局事件，具体请参考[enableGlobalEvent(Emitter)](#enableglobaleventemitter)
+注册任何全局事件前需要先启用全局事件，具体请参考 [enableGlobalEvent(Emitter)](#enableglobaleventemitter)
 
 #### resolve
 
-resolved事件 任何[Resolver](doc/resolver.md)对象处于`fulfilled`时触发
+resolved事件 任何 [Resolver](doc/resolver.md) 对象处于 `fulfilled` 时触发
 
 * **data** `{*}` 数据
 
 #### reject
 
-rejected事件 任何[Resolver](doc/resolver.md)对象处于`rejected`时触发
+rejected事件 任何 [Resolver](doc/resolver.md) 对象处于 `rejected` 时触发
 
 * **reason** `{*}` 失败原因
 
 ### Classes
 
-* [Resolver](doc/resolver.md) 操作的状态保持对象，用于产生[Promise](promise.md)对象
-* [Promise](doc/promise.md) 由[Resolver](resolver.md)对象产生，用于表示一个正在进行的操作
+* [Resolver](doc/resolver.md) 操作的状态保持对象，用于产生 [Promise](promise.md) 对象
+* [Promise](doc/promise.md) 由 [Resolver](resolver.md) 对象产生，用于表示一个正在进行的操作
 
 ## Test
 
-使用Promises/A+规范的[Test Suite](https://github.com/promises-aplus/promises-tests)
+使用Promises/A+规范的 [Test Suite](https://github.com/promises-aplus/promises-tests)
 
     $ npm install
     $ npm test
