@@ -3,7 +3,7 @@
  * @author treelite(c.xinle@gmail.com)
  */
 
-define(function () {
+(function () {
 
     /**
      * resolver的状态
@@ -60,13 +60,21 @@ define(function () {
             callbacks.splice(0, i);
         }
 
-        // nodejs support this
-        // only IE on browser, currently
+        // For node env
+        if (typeof process !== 'undefined'
+            && process !== null
+            && typeof process.nextTick === 'function'
+        ) {
+            res = function (fn) {
+                return process.nextTick(fn);
+            };
+        }
+        // Only IE on browser, currently
         // https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/setImmediate/Overview.html#processingmodel
-        if (typeof setImmediate === 'function') {
+        else if (typeof setImmediate === 'function') {
             res = setImmediate;
         }
-        // for modern browser
+        // For modern browser
         else if (Observer = window.MutationObserver
             || window.webKitMutationObserver
         ) {
@@ -87,7 +95,7 @@ define(function () {
                 );
             };
         }
-        // it's faster than `setTimeout`
+        // It's faster than `setTimeout`
         else if (isFunction(window.postMessage)) {
             window.addEventListener(
                 'message',
@@ -104,7 +112,7 @@ define(function () {
                 window.postMessage(NAME, '*');
             };
         }
-        // for older browser
+        // For older browser
         else {
             res = function (fn) {
                 setTimeout(fn, 0);
@@ -258,7 +266,7 @@ define(function () {
             // 设置延迟
             // 为了让then函数先返回再执行回调
             // see #2.2.4
-            nextTick(
+            Resolver.nextTick(
                 function () {
                     callback(resolver.data);
                 }
@@ -293,7 +301,7 @@ define(function () {
         // 触发注册的回调函数必须
         // 在状态改变完成后
         // see #2.2.2 #2.2.3 #2.2.4
-        nextTick(
+        Resolver.nextTick(
             function () {
                 var item;
                 while (item = items.shift()) {
@@ -397,6 +405,9 @@ define(function () {
         this.fulfillList = [];
         this.rejectList = [];
     }
+
+    // 导出nextTick 方便重载
+    Resolver.nextTick = nextTick;
 
     /**
      * 启用全局事件
@@ -563,5 +574,14 @@ define(function () {
         return createPromise(this);
     };
 
-    return Resolver;
-});
+    // Export
+    if (typeof exports === 'object' && typeof module === 'object') {
+        exports = module.exports = Resolver;
+    }
+    else if (typeof define === 'function' && define.amd) {
+        define(function () {
+            return Resolver;
+        });
+    }
+
+})();

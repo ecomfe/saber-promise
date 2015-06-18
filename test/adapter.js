@@ -3,16 +3,7 @@
  * @author treelite(c.xinle@gmail.com)
  */
 
-var Resolver;
-
-// eval的方法不能断点调试
-// 改用require + global函数注册的方式
-
-global.define = function (def) {
-     Resolver = def();
-};
-
-require('../src/promise');
+var Resolver = require('../promise');
 
 exports.resolved = function (value) {
     return Resolver.resolved(value);

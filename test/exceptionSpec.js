@@ -3,11 +3,7 @@
  * @author treelite(c.xinle@gmail.com)
  */
 
-global.define = function (def) {
-     global.Resolver = def();
-};
-
-require('../src/promise');
+var Resolver = require('../promise');
 
 // mock Emitter
 var Emitter = {
