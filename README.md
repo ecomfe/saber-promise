@@ -120,6 +120,13 @@ promise.then(function () {
 * **promises** `{Array.<promise>|...promise}` 待关联的 `Promise` 对象，可以是数组参数或者多个 `Promise` 对象
 * _return_ `{Promise}` [Promise](doc/promise.md) 对象
 
+#### race(promises)
+
+关联多个 [Promise](doc/promise.md) 对象并返回一个新的 `Promise` 对象，关联的 `Promise` 对象中有任意一个 `Promise` 被解决（`fulfilled`）或拒绝（`rejected`）后，新返回的 `Promise` 对象立刻以相同的解决值被解决或以相同的拒绝原因被拒绝。
+
+* **promises** `{Array.<promise>|...promise}` 待关联的 `Promise` 对象，可以是数组参数或者多个 `Promise` 对象
+* _return_ `{Promise}` [Promise](doc/promise.md) 对象
+
 #### enableGlobalEvent(Emitter)
 
 **非标准API** 启动全局事件
