@@ -1,5 +1,5 @@
 /**
- * @file 异常处理测试
+ * @file catch 测试
  * @author treelite(c.xinle@gmail.com)
  */
 

@@ -366,8 +366,12 @@
      */
     function createPromise(resolver) {
         return {
-            then: function (onFulfilled, onRejected) {
+            'then': function (onFulfilled, onRejected) {
                 return then(resolver, onFulfilled, onRejected);
+            },
+
+            'catch': function (onRejected) {
+                return then(resolver, null, onRejected);
             }
         };
     }
@@ -473,6 +477,34 @@
         });
 
         return resolve.promise();
+    };
+
+    /**
+     * Race
+     *
+     * @param {...Promise|Array.<Promise>} promises promise参数
+     * @return {Promise}
+     */
+    Resolver.race = function (promises) {
+        var resolver = new Resolver();
+
+        if (!Array.isArray(promises)) {
+            promises = Array.prototype.slice.call(arguments);
+        }
+
+        function fulfill(data) {
+            resolver.fulfill(data);
+        }
+
+        function reject(reason) {
+            resolver.reject(reason);
+        }
+
+        promises.forEach(function (item) {
+            item.then(fulfill, reject);
+        });
+
+        return resolver.promise();
     };
 
     /**
