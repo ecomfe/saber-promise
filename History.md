@@ -1,3 +1,8 @@
+# 2.1.0 / 2015-10-13
+
+* 添加 [Resolver.race](./README.md#racepromises) 方法
+* 添加 [promise.catch](./doc/promise.md#catchonrejected) 方法
+
 # 2.0.0 / 2015-06-18
 
 * 同构化，支持 node 环境运行
